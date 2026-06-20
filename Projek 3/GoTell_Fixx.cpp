@@ -1037,7 +1037,7 @@ void menuHousekeeping(User *user) {
     int pilihan;
 
     do {
-        pilihan = pilihMenuKotak("MENU HOUSEKEEPING - " + user->nama, opsi, jumlahOpsi);
+        pilihan = pilihMenuKotak("                  MENU HOUSEKEEPING - " + user->nama, opsi, jumlahOpsi);
 
         switch (pilihan) {
             case 0: tampilkanSemuaKamar();      tungguTombol(); break;
@@ -1192,7 +1192,7 @@ void menuManager(User *user) {
     int pilihan;
 
     do {
-        pilihan = pilihMenuKotak("MENU MANAGER - " + user->nama, opsi, jumlahOpsi);
+        pilihan = pilihMenuKotak("                MENU MANAGER - " + user->nama, opsi, jumlahOpsi);
 
         switch (pilihan) {
             case 0: tampilkanDashboard();         tungguTombol(); break;
@@ -1212,9 +1212,11 @@ User* login() {
         string username = bacaTeks("Username");
         string password = bacaTeks("Password");
 
+        // Animasi dijalankan setelah user selesai input username & password.
+        animasiLoading("Memeriksa data login...");
+
         User *user = cariUser(username);
         if (user != nullptr && user->password == password) {
-            animasiLoading("Memverifikasi akun...");
             return user;
         }
         percobaan++;
@@ -1247,35 +1249,41 @@ void tampilkanPenutup() {
     clearScreen();
 
     cout << BIRU << TEBAL;
-    garis(LEBAR_LAYAR, '=');
-    cout << RESET;
-
-    cout << KUNING << TEBAL;
     cout << R"(
-        ╔════════════════════════════════════════════╗
-        ║                                            ║
-        ║         ★  TERIMA KASIH TELAH  ★           ║
-        ║            MENGGUNAKAN GOTELL              ║
-        ║                                            ║
-        ║       Smart Hotel Management System        ║
-        ║                                            ║
-        ╚════════════════════════════════════════════╝
+   ██████╗  ██████╗  ██████╗ ██████╗     ██████╗ ██╗   ██╗███████╗
+  ██╔════╝ ██╔═══██╗██╔═══██╗██╔══██╗    ██╔══██╗╚██╗ ██╔╝██╔════╝
+  ██║  ███╗██║   ██║██║   ██║██║  ██║    ██████╔╝ ╚████╔╝ █████╗
+  ██║   ██║██║   ██║██║   ██║██║  ██║    ██╔══██╗  ╚██╔╝  ██╔══╝
+  ╚██████╔╝╚██████╔╝╚██████╔╝██████╔╝    ██████╔╝   ██║   ███████╗
+   ╚═════╝  ╚═════╝  ╚═════╝ ╚═════╝     ╚═════╝    ╚═╝   ╚══════╝
 )";
     cout << RESET;
 
-    cout << HIJAU << TEBAL;
-    cout << "             Sistem berhasil ditutup dengan aman.\n";
+    cout << KUNING << TEBAL;
+    cout << "        S e s s i o n   C l o s e d   -   G o T e l l   H o t e l\n";
     cout << RESET;
 
-    cout << BIRU;
-    cout << "            Sampai jumpa kembali di GoTell Hotel!\n";
-    cout << RESET;
+    garis(LEBAR_LAYAR, '=');
+
+    cout << "\n";
 
     cout << BIRU << TEBAL;
-    garis(LEBAR_LAYAR, '=');
+    cout << "             Terima kasih telah menggunakan GoTell Hotel.\n";
+    cout << "             Sampai jumpa kembali di sistem berikutnya.\n";
     cout << RESET;
 
     cout << "\n";
+
+    garis(LEBAR_LAYAR, '=');
+}
+
+// [BARU] Menu awal sebelum login: pilih "Login" atau "Keluar".
+// Pakai pilihMenuKotak yang sama dengan menu-menu lain supaya konsisten
+// (navigasi pakai tombol panah ATAS/BAWAH + ENTER lewat conio.h).
+int menuAwal() {
+    string opsi[] = { "Login", "Keluar" };
+    int jumlahOpsi = 2;
+    return pilihMenuKotak("                SELAMAT DATANG DI GOTELL HOTEL", opsi, jumlahOpsi);
 }
 
 int main() {
@@ -1288,10 +1296,18 @@ int main() {
 
     bool lanjutProgram = true;
     while (lanjutProgram) {
+        // [BARU] Tampilkan menu awal dulu sebelum layar login.
+        int pilihanAwal = menuAwal();
+        if (pilihanAwal == 1) { // "Keluar" dipilih
+            lanjutProgram = false;
+            break;
+        }
+
         User *user = login();
         if (user == nullptr) {
-            cout << MERAH << "\n  Gagal login 3 kali. Program dihentikan.\n" << RESET;
-            break;
+            cout << MERAH << "\n  Gagal login 3 kali. Kembali ke menu awal.\n" << RESET;
+            tungguTombol();
+            continue; // [DIUBAH] dulu langsung break, sekarang balik ke menu awal, bukan keluar program
         }
 
         clearScreen();
@@ -1308,10 +1324,17 @@ int main() {
             menuHousekeeping(user);
         }
 
-        string lagi = bacaTeks("Login sebagai user lain? (y/n)");
-        if (lagi != "y" && lagi != "Y") {
-            lanjutProgram = false;
-        }
+        // Menu role selesai berarti user memilih Logout.
+        // Jadi animasi logout ditaruh di sini agar berlaku untuk semua role.
+        clearScreen();
+        tampilkanBanner();
+        cout << KUNING << "\n  Logout dari akun " << user->username
+             << " (" << user->role << ")" << RESET << "\n";
+        animasiLoading("Mengakhiri sesi akun...");
+        // [DIUBAH] Tidak perlu lagi tanya "Login sebagai user lain? (y/n)"
+        // karena setelah logout, program otomatis kembali ke menuAwal()
+        // di awal perulangan while di atas.
+        tungguTombol();
     }
 
     simpanSemuaData(); // [BARU] simpan terakhir kali sebelum benar-benar keluar
