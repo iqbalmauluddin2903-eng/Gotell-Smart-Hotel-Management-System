@@ -747,8 +747,7 @@ Kamar* bacaKamarKosong() {
 
 // ============================================================
 // prosesCheckIn(), Urutan validasi :
-//   1. Cek dulu apakah kapasitas tamu & transaksi masih cukup
-//      (SEBELUM data apapun diubah / ditambah).
+//   1. Cek dulu apakah kapasitas tamu & transaksi masih cukup (SEBELUM data apapun diubah / ditambah).
 //   2. Baru tampilkan kamar tersedia & minta input.
 //   3. KTP & HP sekarang pakai validasi format (bacaKTP, bacaNoHP).
 // tidak akan ada lagi kasus "tamu baru sudah kebuat tapi transaksinya gagal karena kapasitas penuh".
@@ -768,11 +767,11 @@ void prosesCheckIn() {
     Kamar *kamar = bacaKamarKosong();
 
     string nama = bacaNamaTamu();
-    string ktp  = bacaKTP();      // [DIUBAH] divalidasi 16 digit angka
-    string telp = bacaNoHP();     // [DIUBAH] divalidasi angka, 9-13 digit, awalan 08/62
+    string ktp  = bacaKTP();      // validasi 16 digit angka
+    string telp = bacaNoHP();     // validasi angka, 9-13 digit, awalan 08/62
     int    malam = bacaAngka("Lama menginap (malam)", 1, 365);
 
-    // [DIUBAH] Batas tamu dicek setelah KTP diketahui.
+    // Batas tamu dicek setelah KTP diketahui.
     // Kalau tamu lama sudah ada, ia tetap boleh check-in walaupun daftarTamu penuh.
     if (cariTamuByKTP(ktp) == nullptr && (int) daftarTamu.size() >= SOFT_LIMIT_TAMU) {
         cout << MERAH << "  Data tamu sudah mencapai batas wajar ("
